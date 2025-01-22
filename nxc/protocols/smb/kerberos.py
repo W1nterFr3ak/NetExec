@@ -31,9 +31,6 @@ def kerberos_login_with_S4U(domain, hostname, username, password, nthash, lmhash
         principal = Principal(username, type=constants.PrincipalNameType.NT_PRINCIPAL.value)
         nxc_logger.debug("Getting TGT for user")
         tgt, cipher, _, session_key = getKerberosTGT(principal, password, domain, lmhash, nthash, aesKey, kdcHost)
-        ccache = CCache()
-        ccache.fromTGT(tgt, session_key, session_key)
-        ccache.saveFile(username + '.ccache')
         my_tgt = decoder.decode(tgt, asn1Spec=AS_REP())[0]
     decoded_tgt = my_tgt
     # Extract the ticket from the TGT
