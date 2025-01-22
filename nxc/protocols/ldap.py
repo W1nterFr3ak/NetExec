@@ -410,6 +410,14 @@ class ldap(connection):
             self.logger.info(f"Connecting to {ldap_url} - {self.baseDN} - {self.host} [3]")
             self.ldap_connection = ldap_impacket.LDAPConnection(url=ldap_url, baseDN=self.baseDN, dstIp=self.host)
             self.ldap_connection.login(self.username, self.password, self.domain, self.lmhash, self.nthash)
+            if self.args.get_tgt and not self.is_guest:
+                principal = Principal(self.username, type=constants.PrincipalNameType.NT_PRINCIPAL.value)
+                tgt, cipher, oldSessionKey, session_key = getKerberosTGT(principal, self.password, domain, "", "", None, self.kdcHost)
+                ccache = CCache()
+                ccache.fromTGT(tgt, oldSessionKey, oldSessionKey)
+                ccache.saveFile(self.username + '.ccache')
+                self.logger.success(f"Ticket saved to {self.username + '.ccache'}")
+            
             self.check_if_admin()
 
             # Prepare success credential text
@@ -496,6 +504,14 @@ class ldap(connection):
             self.logger.info(f"Connecting to {ldaps_url} - {self.baseDN} - {self.host}")
             self.ldap_connection = ldap_impacket.LDAPConnection(url=ldaps_url, baseDN=self.baseDN, dstIp=self.host)
             self.ldap_connection.login(self.username, self.password, self.domain, self.lmhash, self.nthash)
+            if self.args.get_tgt:
+                principal = Principal(self.username, type=constants.PrincipalNameType.NT_PRINCIPAL.value)
+                tgt, cipher, oldSessionKey, session_key = getKerberosTGT(principal, None, domain, lmhash, nthash, None, self.kdcHost)
+                ccache = CCache()
+                ccache.fromTGT(tgt, oldSessionKey, oldSessionKey)
+                ccache.saveFile(self.username + '.ccache')
+                self.logger.success(f"Ticket saved to {self.username + '.ccache'}")
+            
             self.check_if_admin()
 
             # Prepare success credential text
