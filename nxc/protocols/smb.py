@@ -464,7 +464,7 @@ class smb(connection):
                 ccache = CCache()
                 ccache.fromTGT(tgt, oldSessionKey, oldSessionKey)
                 ccache.saveFile(self.username + '.ccache')
-                self.logger.success(f"[+] Ticket saved to {self.username + '.ccache'}")
+                self.logger.success(f"Ticket saved to {self.username + '.ccache'}")
 
             
             self.logger.debug(f"{self.is_guest=}")
@@ -539,7 +539,7 @@ class smb(connection):
                 ccache = CCache()
                 ccache.fromTGT(tgt, oldSessionKey, oldSessionKey)
                 ccache.saveFile(self.username + '.ccache')
-                self.logger.success(f"[+] Ticket saved to {self.username + '.ccache'}")
+                self.logger.success(f"Ticket saved to {self.username + '.ccache'}")
             
             self.logger.debug(f"{self.is_guest=}")
             if "Unix" not in self.server_os:
