@@ -460,7 +460,7 @@ class smb(connection):
             self.is_guest = bool(self.conn.isGuestSession())
             if self.args.get_tgt and not self.is_guest:
                 principal = Principal(self.username, type=constants.PrincipalNameType.NT_PRINCIPAL.value)
-                tgt, cipher, _, session_key = getKerberosTGT(principal, self.password, domain, "", None, self.kdcHost)
+                tgt, cipher, _, session_key = getKerberosTGT(principal, self.password, domain, "", "", None, self.kdcHost)
                 ccache = CCache()
                 ccache.fromTGT(ticket, sessionKey, sessionKey)
                 ccache.saveFile(self.username + '.ccache')
@@ -534,7 +534,7 @@ class smb(connection):
             self.is_guest = bool(self.conn.isGuestSession())
             if self.args.get_tgt and not self.is_guest:
                 principal = Principal(self.username, type=constants.PrincipalNameType.NT_PRINCIPAL.value)
-                tgt, cipher, _, session_key = getKerberosTGT(principal, "", domain, self.hash, None, self.kdcHost)
+                tgt, cipher, _, session_key = getKerberosTGT(principal, None, domain, lmhash, nthash, None, self.kdcHost)
                 ccache = CCache()
                 ccache.fromTGT(ticket, sessionKey, sessionKey)
                 ccache.saveFile(self.username + '.ccache')
