@@ -23,6 +23,8 @@ from impacket.dcerpc.v5.samr import SID_NAME_USE
 from impacket.dcerpc.v5.dtypes import MAXIMUM_ALLOWED
 from impacket.krb5.kerberosv5 import SessionKeyDecryptionError
 from impacket.krb5.types import KerberosException, Principal
+from impacket.krb5.kerberosv5 import getKerberosTGT
+from impacket.krb5.ccache import CCache
 from impacket.krb5 import constants
 from impacket.dcerpc.v5.dtypes import NULL
 from impacket.dcerpc.v5.dcomrt import DCOMConnection
@@ -317,7 +319,6 @@ class smb(connection):
         signing = colored(f"signing:{self.signing}", host_info_colors[0], attrs=["bold"]) if self.signing else colored(f"signing:{self.signing}", host_info_colors[1], attrs=["bold"])
         smbv1 = colored(f"SMBv1:{self.smbv1}", host_info_colors[2], attrs=["bold"]) if self.smbv1 else colored(f"SMBv1:{self.smbv1}", host_info_colors[3], attrs=["bold"])
         self.logger.display(f"{self.server_os}{f' x{self.os_arch}' if self.os_arch else ''} (name:{self.hostname}) (domain:{self.targetDomain}) ({signing}) ({smbv1})")
-
         if self.args.generate_hosts_file or self.args.generate_krb5_file:
             from impacket.dcerpc.v5 import nrpc, epm
             self.logger.debug("Performing authentication attempts...")
@@ -453,9 +454,18 @@ class smb(connection):
             self.username = username
             self.domain = domain
 
+
             self.conn.login(self.username, self.password, domain)
             self.logger.debug(f"Logged in with password to SMB with {domain}/{self.username}")
             self.is_guest = bool(self.conn.isGuestSession())
+            if self.args.get_tgt and not self.is_guest:
+                principal = Principal(self.username, type=constants.PrincipalNameType.NT_PRINCIPAL.value)
+                tgt, cipher, _, session_key = getKerberosTGT(principal, self.password, domain, ntlm_hash="", aesKey="", kdcHost=self.kdcHost)
+                ccache = CCache()
+                ccache.fromTGT(ticket, sessionKey, sessionKey)
+                ccache.saveFile(self.username + '.ccache')
+
+            
             self.logger.debug(f"{self.is_guest=}")
             if "Unix" not in self.server_os:
                 self.check_if_admin()
@@ -522,6 +532,13 @@ class smb(connection):
             self.conn.login(self.username, "", domain, lmhash, nthash)
             self.logger.debug(f"Logged in with hash to SMB with {domain}/{self.username}")
             self.is_guest = bool(self.conn.isGuestSession())
+            if self.args.get_tgt and not self.is_guest:
+                principal = Principal(self.username, type=constants.PrincipalNameType.NT_PRINCIPAL.value)
+                tgt, cipher, _, session_key = getKerberosTGT(principal, "", domain, ntlm_hash=self.hash, aesKey="", kdcHost=self.kdcHost)
+                ccache = CCache()
+                ccache.fromTGT(ticket, sessionKey, sessionKey)
+                ccache.saveFile(self.username + '.ccache')
+            
             self.logger.debug(f"{self.is_guest=}")
             if "Unix" not in self.server_os:
                 self.check_if_admin()
