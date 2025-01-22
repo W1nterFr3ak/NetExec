@@ -22,7 +22,6 @@ def proto_args(parser, parents):
     smb_parser.add_argument("--laps", dest="laps", metavar="LAPS", type=str, help="LAPS authentification", nargs="?", const="administrator")
     smb_parser.add_argument("--generate-hosts-file", type=str, help="Generate a hosts file like from a range of IP")
     smb_parser.add_argument("--generate-krb5-file", type=str, help="Generate a krb5 file like from a range of IP")
-    smb_parser.add_argument("--get-tgt", action="store_true", help="Get TGT")
 
     self_delegate_arg.make_required = [delegate_arg]
 
@@ -36,6 +35,8 @@ def proto_args(parser, parents):
     cred_gathering_group.add_argument("--pvk", action="store", help="DPAPI option. File with domain backupkey")
     cred_gathering_group.add_argument("--enabled", action="store_true", help="Only dump enabled targets from DC")
     cred_gathering_group.add_argument("--user", dest="userntds", type=str, help="Dump selected user from DC")
+    cred_gathering_group.add_argument("--get-tgt", action="store_true", help="Get TGT")
+
 
     mapping_enum_group = smb_parser.add_argument_group("Mapping/Enumeration", "Options for Mapping/Enumerating")
     mapping_enum_group.add_argument("--shares", action="store_true", help="enumerate shares and access")
