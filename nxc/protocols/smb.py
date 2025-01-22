@@ -460,9 +460,9 @@ class smb(connection):
             self.is_guest = bool(self.conn.isGuestSession())
             if self.args.get_tgt and not self.is_guest:
                 principal = Principal(self.username, type=constants.PrincipalNameType.NT_PRINCIPAL.value)
-                tgt, cipher, _, session_key = getKerberosTGT(principal, self.password, domain, "", "", None, self.kdcHost)
+                tgt, cipher, oldSessionKey, session_key = getKerberosTGT(principal, self.password, domain, "", "", None, self.kdcHost)
                 ccache = CCache()
-                ccache.fromTGT(tgt, session_key, session_key)
+                ccache.fromTGT(tgt, oldSessionKey, oldSessionKey)
                 ccache.saveFile(self.username + '.ccache')
 
             
@@ -534,9 +534,9 @@ class smb(connection):
             self.is_guest = bool(self.conn.isGuestSession())
             if self.args.get_tgt and not self.is_guest:
                 principal = Principal(self.username, type=constants.PrincipalNameType.NT_PRINCIPAL.value)
-                tgt, cipher, _, session_key = getKerberosTGT(principal, None, domain, lmhash, nthash, None, self.kdcHost)
+                tgt, cipher, oldSessionKey, session_key = getKerberosTGT(principal, None, domain, lmhash, nthash, None, self.kdcHost)
                 ccache = CCache()
-                ccache.fromTGT(tgt, session_key, session_key)
+                ccache.fromTGT(tgt, oldSessionKey, oldSessionKey)
                 ccache.saveFile(self.username + '.ccache')
             
             self.logger.debug(f"{self.is_guest=}")
