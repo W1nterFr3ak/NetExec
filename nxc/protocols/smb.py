@@ -458,15 +458,6 @@ class smb(connection):
             self.conn.login(self.username, self.password, domain)
             self.logger.debug(f"Logged in with password to SMB with {domain}/{self.username}")
             self.is_guest = bool(self.conn.isGuestSession())
-            if self.args.get_tgt and not self.is_guest:
-                principal = Principal(self.username, type=constants.PrincipalNameType.NT_PRINCIPAL.value)
-                tgt, cipher, oldSessionKey, session_key = getKerberosTGT(principal, self.password, domain, "", "", None, self.kdcHost)
-                ccache = CCache()
-                ccache.fromTGT(tgt, oldSessionKey, oldSessionKey)
-                ccache.saveFile(self.username + '.ccache')
-                self.logger.success(f"Ticket saved to {self.username + '.ccache'}")
-
-            
             self.logger.debug(f"{self.is_guest=}")
             if "Unix" not in self.server_os:
                 self.check_if_admin()
@@ -479,6 +470,13 @@ class smb(connection):
 
             out = f"{domain}\\{self.username}:{process_secret(self.password)} {self.mark_guest()}{self.mark_pwned()}"
             self.logger.success(out)
+            if self.args.get_tgt and not self.is_guest:
+                principal = Principal(self.username, type=constants.PrincipalNameType.NT_PRINCIPAL.value)
+                tgt, cipher, oldSessionKey, session_key = getKerberosTGT(principal, self.password, domain, "", "", None, self.kdcHost)
+                ccache = CCache()
+                ccache.fromTGT(tgt, oldSessionKey, oldSessionKey)
+                ccache.saveFile(self.username + '.ccache')
+                self.logger.success(f"Ticket saved to {self.username + '.ccache'}")
 
             if not self.args.local_auth and self.username != "":
                 add_user_bh(self.username, self.domain, self.logger, self.config)
@@ -533,13 +531,6 @@ class smb(connection):
             self.conn.login(self.username, "", domain, lmhash, nthash)
             self.logger.debug(f"Logged in with hash to SMB with {domain}/{self.username}")
             self.is_guest = bool(self.conn.isGuestSession())
-            if self.args.get_tgt and not self.is_guest:
-                principal = Principal(self.username, type=constants.PrincipalNameType.NT_PRINCIPAL.value)
-                tgt, cipher, oldSessionKey, session_key = getKerberosTGT(principal, None, domain, lmhash, nthash, None, self.kdcHost)
-                ccache = CCache()
-                ccache.fromTGT(tgt, oldSessionKey, oldSessionKey)
-                ccache.saveFile(self.username + '.ccache')
-                self.logger.success(f"Ticket saved to {self.username + '.ccache'}")
             
             self.logger.debug(f"{self.is_guest=}")
             if "Unix" not in self.server_os:
@@ -552,6 +543,13 @@ class smb(connection):
 
             out = f"{domain}\\{self.username}:{process_secret(self.hash)} {self.mark_guest()}{self.mark_pwned()}"
             self.logger.success(out)
+            if self.args.get_tgt and not self.is_guest:
+                principal = Principal(self.username, type=constants.PrincipalNameType.NT_PRINCIPAL.value)
+                tgt, cipher, oldSessionKey, session_key = getKerberosTGT(principal, None, domain, lmhash, nthash, None, self.kdcHost)
+                ccache = CCache()
+                ccache.fromTGT(tgt, oldSessionKey, oldSessionKey)
+                ccache.saveFile(self.username + '.ccache')
+                self.logger.success(f"Ticket saved to {self.username + '.ccache'}")
 
             if not self.args.local_auth and self.username != "":
                 add_user_bh(self.username, self.domain, self.logger, self.config)
